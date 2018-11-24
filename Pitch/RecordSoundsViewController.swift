@@ -20,11 +20,16 @@ class RecordSoundsViewController: UIViewController, AVAudioRecorderDelegate{
 		super.viewDidLoad()
 		stopRecordingButton.isEnabled = false
 	}
+	
+	func setUI(state: Bool) {
+		recordingLabel.text = state ? "Recording in Progress" : "Tap to Record"
+		stopRecordingButton.isEnabled = state
+		recordButton.isEnabled = !state
+	}
 
 	@IBAction func recordButton(_ sender: UIButton) {
-		recordingLabel.text = "Recording in Progress"
-		stopRecordingButton.isEnabled = true
-		recordButton.isEnabled = false
+		setUI(state: true)
+
 		
 		let dirPath = NSSearchPathForDirectoriesInDomains(.documentDirectory,.userDomainMask, true)[0] as String
 		let recordingName = "recordedVoice.wav"
@@ -43,9 +48,7 @@ class RecordSoundsViewController: UIViewController, AVAudioRecorderDelegate{
 	
 	
 	@IBAction func stopRecordingButton(_ sender: UIButton) {
-		recordingLabel.text = "Tap to Record"
-		recordButton.isEnabled = true
-		stopRecordingButton.isEnabled = false
+		setUI(state: false)
 		audioRecorder.stop()
 		let audioSession = AVAudioSession.sharedInstance()
 		try! audioSession.setActive(false)
@@ -59,11 +62,11 @@ class RecordSoundsViewController: UIViewController, AVAudioRecorderDelegate{
 	}
 	
 	override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-		if segue.identifier == "stopRecording" {
-			let playSoundsVC = segue.destination as! PlaySoundsViewController
-			let recordeAudioURL = sender as! URL
-			playSoundsVC.recordedAudioURL = recordeAudioURL
+		guard segue.identifier == "stopRecording" else {return}
+		guard let playSoundsVC = segue.destination as? PlaySoundsViewController else {return}
+		guard let recordedAudioURL = sender as? URL else {return}
+		playSoundsVC.recordedAudioURL = recordedAudioURL
 		}
-	}
 }
+
 
